@@ -1,5 +1,5 @@
 import tkinter as tk
-        
+
 class NEAGui:
     
     def __init__(self):
@@ -76,6 +76,10 @@ class LoginPage(tk.Frame):
         
     def CheckLoginConditions(self,email,password):
         print(email,password)
+        if email == "susburger21@gmail.com" and password == "sussy21":
+            # Login Test
+            pass
+            
         
 class StartPage(tk.Frame):
     def __init__(self,parent,controller):
@@ -90,3 +94,4 @@ class StartPage(tk.Frame):
         self.loginbutton.pack()
         
 NEAGui()
+
