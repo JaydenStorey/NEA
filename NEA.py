@@ -11,22 +11,28 @@ class NEAGui:
         self.windowheight = 480
         self.windowwidth = 720
         self.root.geometry(f"{self.windowwidth}x{self.windowheight}")
-        
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+
         # Container stores the pages
         self.container = ctk.CTkFrame(self.root) # To hold the central frame
-        self.container.place(relx=0.5, rely=0.2, anchor="center", y = 50)
+        self.container.grid(row = 0, column = 0, sticky = "nsew")
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
         
         self.pages = {}
         
         # add pages
         self.AddPage(StartPage)
         self.AddPage(LoginPage)
+        self.AddPage(SignUpPage)
         
         # show starting page
         
         self.HidePage(LoginPage)
+        self.HidePage(SignUpPage)
         self.ShowPage(StartPage)
-        
+                
         self.root.mainloop()
     
     def GetPage(self,pagename):
@@ -37,6 +43,7 @@ class NEAGui:
         page = pagename(self.container, self)
         self.pages[pagename] = page
         page.grid(row=0, column=0, sticky="nsew")
+
 
     def ShowPage(self, pagename):
         page = self.GetPage(pagename)
@@ -53,6 +60,8 @@ class LoginPage(tk.Frame):
     def __init__(self,parent,controller):
         super().__init__(parent)
         
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         self.controller = controller
                 
         self.logintext = ctk.CTkLabel(self, text = "Login", font = ('Arial', 40))
@@ -62,7 +71,7 @@ class LoginPage(tk.Frame):
         self.emailentrylabel = ctk.CTkLabel(self, text = "Enter Email Address", font = ('Arial', 15))
         self.emailentrylabel.pack()
         
-        self.emailentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 45,)
+        self.emailentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
         self.emailentry.pack()
         
         # password entry
@@ -70,25 +79,30 @@ class LoginPage(tk.Frame):
         self.passwordentrylabel = ctk.CTkLabel(self, text = "Enter Password", font = ('Arial', 15))
         self.passwordentrylabel.pack()
 
-        self.passwordentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 45, show = "*")
+        self.passwordentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, show = "*", corner_radius = 7)
         self.passwordentry.pack()
         
         # login button
         
-        self.loginbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Login", fg_color = "light grey", command = lambda: self.CheckLoginConditions(self.emailentry.get(),self.passwordentry.get()))
+        self.loginbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Login", fg_color = "red", command = lambda: self.CheckLoginConditions(self.emailentry.get(),self.passwordentry.get()))
         self.loginbutton.pack(pady = 10)
         
-    def CheckLoginConditions(self,email,password):
-        print(email,password)
-        if email == "susburger21@gmail.com" and password == "sussy21":
-            # Login Test
-            pass
+class SignUpPage(tk.Frame):
+        
+    def __init__(self,parent,controller):
+        super().__init__(parent)
+        
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.controller = controller
             
         
 class StartPage(tk.Frame):
     def __init__(self,parent,controller):
         super().__init__(parent)
         
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
         self.controller = controller
         
         self.title = ctk.CTkLabel(self, text = "Hot Stuff", font = ('Arial', 50), anchor = "center")
@@ -97,5 +111,9 @@ class StartPage(tk.Frame):
         self.loginbutton = ctk.CTkButton(self, text = "Log In", command = lambda: controller.ShowPage(LoginPage))
         self.loginbutton.pack()
         
+        self.signupbutton = ctk.CTkButton(self, text = "Sign up", command = lambda: controller.ShowPage(SignUpPage))
+        self.signupbutton.pack()
+        
 NEAGui()
+
 
