@@ -64,7 +64,7 @@ class LoginPage(tk.Frame):
         self.grid_columnconfigure(0, weight=1)
         self.controller = controller
                 
-        self.logintext = ctk.CTkLabel(self, text = "Login", font = ('Arial', 40))
+        self.logintext = ctk.CTkLabel(self, text = "Sign In", font = ('Arial', 40))
         self.logintext.pack()
         # email entry
         
@@ -87,6 +87,14 @@ class LoginPage(tk.Frame):
         self.loginbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Login", fg_color = "red", command = lambda: self.CheckLoginConditions(self.emailentry.get(),self.passwordentry.get()))
         self.loginbutton.pack(pady = 10)
         
+        # back button
+        
+        self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(LoginPage))
+        self.BackButton.place(x = 55, y = 10)
+        
+    def CheckLoginConditions(self,email,password):
+        pass
+        
 class SignUpPage(tk.Frame):
         
     def __init__(self,parent,controller):
@@ -95,8 +103,49 @@ class SignUpPage(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         self.controller = controller
-            
         
+        self.logintext = ctk.CTkLabel(self, text = "Register", font = ('Arial', 40))
+        self.logintext.pack()
+        
+        # enter name
+        
+        self.enternamelabel = ctk.CTkLabel(self, text = "Enter your first and last name", font = ('Arial', 15))
+        self.enternamelabel.pack()
+        
+        self.enternameentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
+        self.enternameentry.pack()
+        
+        # email entry
+        
+        self.emailentrylabel = ctk.CTkLabel(self, text = "Enter Email Address", font = ('Arial', 15))
+        self.emailentrylabel.pack()
+        
+        self.emailentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
+        self.emailentry.pack()
+        
+        # password entry
+        
+        self.passwordentrylabel = ctk.CTkLabel(self, text = "Enter Password", font = ('Arial', 15))
+        self.passwordentrylabel.pack()
+
+        self.passwordentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
+        self.passwordentry.pack()
+        
+        # sign up button
+        
+        self.createaccountbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Create Account", fg_color = "red", command = lambda: self.CreateAccount(self.enternameentry.get(),self.emailentry.get(),self.passwordentry.get()))
+        self.createaccountbutton.pack(pady = 10)
+        
+        # back button
+        
+        self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(SignUpPage))
+        self.BackButton.place(x = 55, y = 10)
+        
+    def CreateAccount(self,name,email,password):
+        print(name,email,password)
+        pass
+        
+
 class StartPage(tk.Frame):
     def __init__(self,parent,controller):
         super().__init__(parent)
@@ -108,11 +157,11 @@ class StartPage(tk.Frame):
         self.title = ctk.CTkLabel(self, text = "Hot Stuff", font = ('Arial', 50), anchor = "center")
         self.title.pack(anchor = "center")
         
-        self.loginbutton = ctk.CTkButton(self, text = "Log In", command = lambda: controller.ShowPage(LoginPage))
-        self.loginbutton.pack()
+        self.loginbutton = ctk.CTkButton(self, text = "Sign in", command = lambda: controller.ShowPage(LoginPage))
+        self.loginbutton.pack(pady = 5)
         
-        self.signupbutton = ctk.CTkButton(self, text = "Sign up", command = lambda: controller.ShowPage(SignUpPage))
-        self.signupbutton.pack()
+        self.signupbutton = ctk.CTkButton(self, text = "Register", command = lambda: controller.ShowPage(SignUpPage))
+        self.signupbutton.pack(pady = 5)
         
 NEAGui()
 
