@@ -1,5 +1,9 @@
 import tkinter as tk
 import customtkinter as ctk
+import sqlite3
+
+database = sqlite3.connect("NEADatabase.db")
+cursor = database.cursor()
 
 class NEAGui:
     
@@ -109,11 +113,17 @@ class SignUpPage(tk.Frame):
         
         # enter name
         
-        self.enternamelabel = ctk.CTkLabel(self, text = "Enter your first and last name", font = ('Arial', 15))
-        self.enternamelabel.pack()
+        self.enterfirstnamelabel = ctk.CTkLabel(self, text = "Enter your first name", font = ('Arial', 15))
+        self.enterfirstnamelabel.pack()
         
-        self.enternameentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
-        self.enternameentry.pack()
+        self.enterfirstnameentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
+        self.enterfirstnameentry.pack()
+        
+        self.enterlastnamelabel = ctk.CTkLabel(self, text = "Enter your last name", font = ('Arial', 15))
+        self.enterlastnamelabel.pack()
+        
+        self.enterlastnameentry = ctk.CTkEntry(self, font = ('Arial', 15), width = 250, corner_radius = 7)
+        self.enterlastnameentry.pack()
         
         # email entry
         
@@ -133,7 +143,7 @@ class SignUpPage(tk.Frame):
         
         # sign up button
         
-        self.createaccountbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Create Account", fg_color = "red", command = lambda: self.CreateAccount(self.enternameentry.get(),self.emailentry.get(),self.passwordentry.get()))
+        self.createaccountbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Create Account", fg_color = "red", command = lambda: self.CreateAccount(self.enterfirstnameentry.get(),self.enterlastnameentry.get(),self.emailentry.get(),self.passwordentry.get()))
         self.createaccountbutton.pack(pady = 10)
         
         # back button
@@ -141,7 +151,8 @@ class SignUpPage(tk.Frame):
         self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(SignUpPage))
         self.BackButton.place(x = 55, y = 10)
         
-    def CreateAccount(self,name,email,password):
+    def CreateAccount(self,firstname,lastname,email,password):
+        name = firstname.strip() + " " + lastname.strip()
         print(name,email,password)
         pass
         
