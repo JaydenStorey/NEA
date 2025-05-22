@@ -4,6 +4,9 @@ import sqlite3
 
 database = sqlite3.connect("NEADatabase.db")
 cursor = database.cursor()
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+print(cursor.fetchall())
+
 
 class NEAGui:
     
@@ -38,6 +41,10 @@ class NEAGui:
         self.ShowPage(StartPage)
                 
         self.root.mainloop()
+        
+    # 
+    # PAGES MANAGER
+    #
     
     def GetPage(self,pagename):
         return self.pages.get(pagename)
@@ -58,7 +65,14 @@ class NEAGui:
         page = self.GetPage(pagename)
         if page:
             page.lower()
-                        
+            
+    #
+    # DATABASE MANAGER
+    #
+    
+
+    
+    
 class LoginPage(tk.Frame):
         
     def __init__(self,parent,controller):
