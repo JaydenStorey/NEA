@@ -2,10 +2,10 @@ import tkinter as tk
 import customtkinter as ctk
 import sqlite3
 
-database = sqlite3.connect("NEADatabase.db")
-cursor = database.cursor()
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-print(cursor.fetchall())
+#database = sqlite3.connect("NEADatabase.db")
+#cursor = database.cursor()
+#cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+#print(cursor.fetchall())
 
 
 class NEAGui:
@@ -70,6 +70,14 @@ class NEAGui:
     # DATABASE MANAGER
     #
     
+    def GetHighestUserID(self):
+        database = sqlite3.connect("NEADatabase.db")
+        cursor = database.cursor()
+        cursor.execute("SELECT MAX(UserID) FROM AccountInformation")
+        userid = cursor.fetchone()[0]
+        database.close()
+        return userid
+    
 
     
     
@@ -111,6 +119,22 @@ class LoginPage(tk.Frame):
         self.BackButton.place(x = 55, y = 10)
         
     def CheckLoginConditions(self,email,password):
+        database = sqlite3.connect("NEADatabase.db")
+        cursor = database.cursor()
+        cursor.execute("SELECT * FROM AccountInformation WHERE EmailAddress=?", (email,))
+        if cursor.fetchone() == None:
+            print("Email is not registered in system")
+            # add error later
+        else:
+            cursor.execute("SELECT Password FROM AccountInformation where EmailAddress = ?", (email,))
+            dbpass = cursor.fetchone()
+            if dbpass == password:
+                print("Password is correct, login successful")
+            else:
+                print("Password is incorrect, login unsuccessful")
+                # add stuff to handle this later
+        
+        database.close()
         pass
         
 class SignUpPage(tk.Frame):
@@ -167,8 +191,16 @@ class SignUpPage(tk.Frame):
         
     def CreateAccount(self,firstname,lastname,email,password):
         name = firstname.strip() + " " + lastname.strip()
+        highestuserid = self.controller.GetHighestUserID()
+        if highestuserid == None:
+            highestuserid = 1
+        
+        database = sqlite3.connect("NEADatabase.db")
+        cursor = database.cursor()
+        cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{password}"))
+        database.commit()
+        database.close()
         print(name,email,password)
-        pass
         
 
 class StartPage(tk.Frame):
