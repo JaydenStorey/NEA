@@ -36,8 +36,7 @@ class NEAGui:
         self.HidePage(LoginPage)
         self.HidePage(SignUpPage)
         self.HidePage(MainMenu)
-        self.ShowPage(StartPage)
-        
+        self.ShowPage(StartPage)        
                 
         self.root.mainloop()
         
@@ -77,13 +76,31 @@ class NEAGui:
         database.close()
         return userid
     
+    def StoreUserInformationLocal(self,userid):
+        database = sqlite3.connect("NEADatabase.db")
+        cursor = database.cursor()
+        cursor.execute("SELECT * FROM AccountInformation WHERE UserID = ?", (userid,))
+        info = cursor.fetchone()
+        
+        email = info[1]
+        firstname = info[2]
+        lastname = info[3]
+        username = info[5]
+        # no need for password as it is only used for login and maybe changing passwords in future
+        
+        database.close()
+        return email, firstname, lastname, username
+    
+    
     #
     # ENCRYPTION AND DECRYPTION
     #
     
     def EncryptData(self,data):
+        # two hashes to ensure security, even with a database leak it would be very hard to decrypt
         hasheddata = hashlib.sha512(data.encode()).hexdigest()
-        return hasheddata
+        secondhash = hashlib.sha512(hasheddata.encode()).hexdigest()
+        return secondhash
     
     # Can't decrypt due to SHA512 restrictions, can only compare hashes
     def CheckEncryptedData(self,foundhash,data):
@@ -103,6 +120,7 @@ class LoginPage(tk.Frame):
                 
         self.logintext = ctk.CTkLabel(self, text = "Sign In", font = ('Arial', 40))
         self.logintext.pack()
+        
         # email entry
         
         self.emailentrylabel = ctk.CTkLabel(self, text = "Enter Email Address", font = ('Arial', 15))
@@ -124,23 +142,22 @@ class LoginPage(tk.Frame):
         self.loginbutton = ctk.CTkButton(self, font = ('Arial', 30), width = 5, text = "Login", fg_color = "red", command = lambda: self.CheckLoginConditions(self.emailentry.get(),self.passwordentry.get()))
         self.loginbutton.pack(pady = 10)
         
+        # error message
+        # this is used to fix warnings with the program
+        self.errormessage = ctk.CTkLabel(self, text = "")
+        
         # back button
         
         self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(LoginPage))
         self.BackButton.place(x = 55, y = 10)
                                          
     def MakeErrorMessage(self,error):
-        try:
-            if self.errormessage:
-                pass
-        except:
-            self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
-            self.errormessage.pack(pady = 5)
-        else:
-            # cannot just pass because error text may change unfortunately
+        if hasattr(self,"errormessage"):
             self.errormessage.destroy()
-            self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
-            self.errormessage.pack(pady = 5)
+            
+        # create a new one everytime incase text changes since idk how to change the text    
+        self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
+        self.errormessage.pack(pady = 5)
                                          
         
     def CheckLoginConditions(self,email,password):
@@ -148,22 +165,19 @@ class LoginPage(tk.Frame):
         cursor = database.cursor()
         cursor.execute("SELECT * FROM AccountInformation WHERE EmailAddress=?", (email,))
         if cursor.fetchone() == None:
-            print("Email is not registered in system")
-            # add error later
+            self.MakeErrorMessage("Email is not found.")
         else:
             cursor.execute("SELECT Password FROM AccountInformation where EmailAddress = ?", (email,))
             dbpass = cursor.fetchone()[0]
             issamepass = self.controller.CheckEncryptedData(dbpass,password)
             if issamepass == True:
-                print("Password is correct, login successful")
-                if self.errormessage:
+                if hasattr(self,"errormessage"):
                     self.errormessage.destroy()
                 
                 self.controller.ShowPage(MainMenu)
                 self.controller.HidePage(LoginPage)
                 # probably add more stuff later
             else:
-                print("Password is incorrect, login unsuccessful")
                 self.MakeErrorMessage("Password is incorrect.")
                 
         database.close()
