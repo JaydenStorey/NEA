@@ -1,12 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 import sqlite3
-
-#database = sqlite3.connect("NEADatabase.db")
-#cursor = database.cursor()
-#cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-#print(cursor.fetchall())
-
+import hashlib
 
 class NEAGui:
     
@@ -39,6 +34,7 @@ class NEAGui:
         self.HidePage(LoginPage)
         self.HidePage(SignUpPage)
         self.ShowPage(StartPage)
+        
                 
         self.root.mainloop()
         
@@ -78,8 +74,20 @@ class NEAGui:
         database.close()
         return userid
     
-
+    #
+    # ENCRYPTION AND DECRYPTION
+    #
     
+    def EncryptData(self,data):
+        hasheddata = hashlib.sha512(data.encode()).hexdigest()
+        return hasheddata
+    
+    # Can't decrypt due to SHA512 restrictions, can only compare hashes
+    def CheckEncryptedData(self,foundhash,data):
+        if self.EncryptData(data) == foundhash:
+            return True
+        else:
+            return False
     
 class LoginPage(tk.Frame):
         
@@ -127,9 +135,12 @@ class LoginPage(tk.Frame):
             # add error later
         else:
             cursor.execute("SELECT Password FROM AccountInformation where EmailAddress = ?", (email,))
-            dbpass = cursor.fetchone()
-            if dbpass == password:
+            dbpass = cursor.fetchone()[0]
+            issamepass = self.controller.CheckEncryptedData(dbpass,password)
+            print(dbpass,password)
+            if issamepass == True:
                 print("Password is correct, login successful")
+                # add stuff to handle this later
             else:
                 print("Password is incorrect, login unsuccessful")
                 # add stuff to handle this later
@@ -195,11 +206,15 @@ class SignUpPage(tk.Frame):
         if highestuserid == None:
             highestuserid = 1
         
+        # encrypt password
+        encryptedpass = self.controller.EncryptData(password)
+        
         database = sqlite3.connect("NEADatabase.db")
         cursor = database.cursor()
-        cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{password}"))
+        cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{encryptedpass}"))
         database.commit()
         database.close()
+        
         print(name,email,password)
         
 
