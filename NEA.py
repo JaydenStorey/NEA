@@ -25,14 +25,17 @@ class NEAGui:
         self.pages = {}
         
         # add pages
+        
         self.AddPage(StartPage)
         self.AddPage(LoginPage)
         self.AddPage(SignUpPage)
+        self.AddPage(MainMenu)
         
         # show starting page
         
         self.HidePage(LoginPage)
         self.HidePage(SignUpPage)
+        self.HidePage(MainMenu)
         self.ShowPage(StartPage)
         
                 
@@ -125,6 +128,20 @@ class LoginPage(tk.Frame):
         
         self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(LoginPage))
         self.BackButton.place(x = 55, y = 10)
+                                         
+    def MakeErrorMessage(self,error):
+        try:
+            if self.errormessage:
+                pass
+        except:
+            self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
+            self.errormessage.pack(pady = 5)
+        else:
+            # cannot just pass because error text may change unfortunately
+            self.errormessage.destroy()
+            self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
+            self.errormessage.pack(pady = 5)
+                                         
         
     def CheckLoginConditions(self,email,password):
         database = sqlite3.connect("NEADatabase.db")
@@ -137,16 +154,19 @@ class LoginPage(tk.Frame):
             cursor.execute("SELECT Password FROM AccountInformation where EmailAddress = ?", (email,))
             dbpass = cursor.fetchone()[0]
             issamepass = self.controller.CheckEncryptedData(dbpass,password)
-            print(dbpass,password)
             if issamepass == True:
                 print("Password is correct, login successful")
-                # add stuff to handle this later
+                if self.errormessage:
+                    self.errormessage.destroy()
+                
+                self.controller.ShowPage(MainMenu)
+                self.controller.HidePage(LoginPage)
+                # probably add more stuff later
             else:
                 print("Password is incorrect, login unsuccessful")
-                # add stuff to handle this later
-        
+                self.MakeErrorMessage("Password is incorrect.")
+                
         database.close()
-        pass
         
 class SignUpPage(tk.Frame):
         
@@ -200,8 +220,9 @@ class SignUpPage(tk.Frame):
         self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(SignUpPage))
         self.BackButton.place(x = 55, y = 10)
         
+        
     def CreateAccount(self,firstname,lastname,email,password):
-        name = firstname.strip() + " " + lastname.strip()
+        # name = firstname.strip() + " " + lastname.strip()
         highestuserid = self.controller.GetHighestUserID()
         if highestuserid == None:
             highestuserid = 1
@@ -214,8 +235,6 @@ class SignUpPage(tk.Frame):
         cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{encryptedpass}"))
         database.commit()
         database.close()
-        
-        print(name,email,password)
         
 
 class StartPage(tk.Frame):
@@ -235,6 +254,19 @@ class StartPage(tk.Frame):
         self.signupbutton = ctk.CTkButton(self, text = "Register", command = lambda: controller.ShowPage(SignUpPage))
         self.signupbutton.pack(pady = 5)
         
+        
+class MainMenu(tk.Frame):
+    def __init__(self,parent,controller):
+        super().__init__(parent)
+        
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.controller = controller
+        
+        self.title = ctk.CTkLabel(self, text = "Hot Stuff Main Menu", font = ('Arial', 50), anchor = "center")
+        self.title.pack(anchor = "center",pady = 5)
+    
+    
 NEAGui()
 
 
