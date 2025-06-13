@@ -2,6 +2,7 @@ import tkinter as tk
 import customtkinter as ctk
 import sqlite3
 import hashlib
+import re
 
 class NEAGui:
     
@@ -158,6 +159,7 @@ class LoginPage(tk.Frame):
         # create a new one everytime incase text changes since idk how to change the text    
         self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
         self.errormessage.pack(pady = 5)
+        self.after(3000, self.errormessage.destroy)
                                          
         
     def CheckLoginConditions(self,email,password):
@@ -234,9 +236,21 @@ class SignUpPage(tk.Frame):
         self.BackButton = ctk.CTkButton(self, font = ('Arial', 15), width = 3, text = "Back", fg_color = "red", command = lambda: controller.HidePage(SignUpPage))
         self.BackButton.place(x = 55, y = 10)
         
+        # error message
+        # this is used to fix warnings with the program
+        self.errormessage = ctk.CTkLabel(self, text = "")
+        
         
     def CreateAccount(self,firstname,lastname,email,password):
-        # name = firstname.strip() + " " + lastname.strip()
+        
+        erroroccured = False
+        patternforemail = r'[^@]+@[^@]+\.[^@]+'
+        if re.match(patternforemail,email) == None:
+            self.MakeErrorMessage("Email is not valid")
+            erroroccured = True
+            print("Error occured")
+        
+        
         highestuserid = self.controller.GetHighestUserID()
         if highestuserid == None:
             highestuserid = 1
@@ -244,11 +258,31 @@ class SignUpPage(tk.Frame):
         # encrypt password
         encryptedpass = self.controller.EncryptData(password)
         
-        database = sqlite3.connect("NEADatabase.db")
-        cursor = database.cursor()
-        cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{encryptedpass}"))
-        database.commit()
-        database.close()
+        # final checks
+        
+        if erroroccured == False:
+            database = sqlite3.connect("NEADatabase.db")
+            cursor = database.cursor()
+            cursor.execute("INSERT INTO AccountInformation (EmailAddress, FirstName, LastName, Password) VALUES (?, ?, ?, ?)", (f"{email}", f"{firstname}",f"{lastname}",f"{encryptedpass}"))
+            database.commit()
+            database.close()
+            if hasattr(self,"errormessage"):
+                self.errormessage.destroy()
+            
+            self.successmessage = ctk.CTkLabel(self, text = "Account was created!", font = ('Arial',15), text_color = "green")
+            self.successmessage.pack(pady = 5)
+            
+            self.after(3000, self.successmessage.destroy)
+        
+        
+    def MakeErrorMessage(self,error):
+        if hasattr(self,"errormessage"):
+            self.errormessage.destroy()
+            
+        # create a new one everytime incase text changes since idk how to change the text    
+        self.errormessage = ctk.CTkLabel(self, text = error, font = ('Arial',15), text_color = "red")
+        self.errormessage.pack(pady = 5)
+        self.after(3000, self.errormessage.destroy)
         
 
 class StartPage(tk.Frame):
@@ -282,5 +316,4 @@ class MainMenu(tk.Frame):
     
     
 NEAGui()
-
 
